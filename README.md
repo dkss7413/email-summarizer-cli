@@ -25,21 +25,21 @@
 
 ### ✅ 4단계: TF-IDF 기반 키워드 추출 및 강조 기능 추가
 - [x] TF-IDF 알고리즘 구현 (단어 빈도 × 역문서빈도)
-- [x] 향상된 키워드 강조 (중요도별 색상 구분)
+- [x] 향상된 키워드 강조 (중요도별 색상 구분, 중복/중첩 방지)
 - [x] 중요도 기반 정렬 및 점수 표시
 - [x] 개선된 문장 중요도 분석 (위치, 길이, 패턴 매칭)
 - [x] CLI 구조 개선 (직관적인 명령어)
 
-### ⏳ 5단계: 다국어 지원 및 고급 기능
-- [ ] 영어 텍스트 처리 개선
-- [ ] 더 정교한 불용어 처리
-- [ ] 문장 유사도 분석
-- [ ] 요약 품질 평가 기능
+### ✅ 5단계: 다국어 지원 및 고급 기능
+- [x] 한글/영어/혼합 텍스트 자동 감지 및 처리
+- [x] 영어/혼합 키워드 강조(복수형, 대소문자, 중첩 방지)
+- [x] 언어별 불용어/패턴/길이 최적화
+- [x] 샘플 파일(영어, 혼합) 추가 및 테스트
 
-### ⏳ 6단계: 테스트 코드 작성
-- [ ] 단위 테스트
-- [ ] 통합 테스트
-- [ ] 테스트 커버리지
+### ⏳ 6단계: 웹 API 및 추가 고급 기능
+- [ ] FastAPI 기반 RESTful API
+- [ ] 문장 유사도, 감정 분석 등 고급 기능
+- [ ] 사용자 정의 옵션/설정
 
 ## 🛠️ 설치 및 실행
 
@@ -63,11 +63,11 @@ python -m email_summarizer --help
 python -m email_summarizer sample/sample.txt
 ```
 
-## 📖 현재 사용법
+## 📖 사용법 및 CLI 옵션
 
 ### 기본 사용법
 ```bash
-# 파일에서 텍스트 요약
+# 파일에서 텍스트 요약 (언어 자동 감지)
 python -m email_summarizer sample/sample.txt
 
 # 상세 정보와 함께 요약
@@ -79,16 +79,21 @@ python -m email_summarizer sample/sample.txt --length long
 # 키워드 강조 (색상 및 굵기)
 python -m email_summarizer sample/sample.txt --highlight
 
-# 모든 옵션 조합
-python -m email_summarizer sample/sample.txt --length long --highlight --verbose
+# 영어/혼합 텍스트 요약 (자동 감지)
+python -m email_summarizer sample/sample_english.txt --highlight
+python -m email_summarizer sample/sample_mixed.txt --highlight
+
+# 언어 강제 지정 (ko/en/mixed/auto)
+python -m email_summarizer sample/sample_english.txt --language en --highlight
+python -m email_summarizer sample/sample_mixed.txt --language mixed --highlight
 ```
 
-### 현재 지원하는 옵션
+### 지원 옵션
 | 옵션 | 축약 | 설명 | 기본값 |
 |------|------|------|--------|
 | `FILE` | - | 요약할 텍스트 파일 경로 | None |
 | `--length` | `-l` | 요약 길이: `short` 또는 `long` | `short` |
-| `--language` | `--lang` | 요약 언어: `ko` 또는 `en` | `ko` |
+| `--language` | `--lang` | 언어: `ko`, `en`, `mixed`, `auto`(자동) | `auto` |
 | `--highlight` | `-h` | 키워드 강조 출력 (색상 및 굵기) | `False` |
 | `--verbose` | `-v` | 상세 정보 출력 | `False` |
 
@@ -96,93 +101,79 @@ python -m email_summarizer sample/sample.txt --length long --highlight --verbose
 ```
 email-summarizer-cli/
 ├── email_summarizer/
-│   ├── __init__.py          # 패키지 초기화
-│   ├── __main__.py          # 모듈 실행 엔트리포인트
-│   ├── cli.py              # Typer CLI 구현 ✅
-│   ├── utils.py            # 입력 처리 및 유틸리티 함수 ✅
-│   └── summarizer.py       # 요약 로직 (TF-IDF 포함) ✅
-├── sample/                 # 샘플 파일들
-│   ├── sample.txt          # 기본 테스트용 샘플 파일
-│   ├── sample_email.txt    # 이메일 형태 샘플 파일
-│   └── sample_article.txt  # 기술 문서 형태 샘플 파일
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── cli.py
+│   ├── utils.py
+│   └── summarizer.py
+├── sample/
+│   ├── sample.txt           # 기본 샘플
+│   ├── sample_email.txt     # 이메일 형태 샘플
+│   ├── sample_article.txt   # 기술 문서 샘플
+│   ├── sample_english.txt   # 영어 기술 문서 샘플
+│   └── sample_mixed.txt     # 한영 혼합 샘플
 ├── tests/
-│   └── test_summarizer.py  # 테스트 코드 (작성 예정) ⏳
-├── requirements.txt        # 의존성 목록
-├── setup.py               # 패키지 설정
-└── README.md              # 프로젝트 문서
+│   └── test_summarizer.py
+├── requirements.txt
+├── setup.py
+└── README.md
 ```
 
-## 🔧 기술 스택
-- **Python 3.7+** - 메인 프로그래밍 언어
-- **Typer** - CLI 프레임워크
-- **TF-IDF** - 키워드 추출 알고리즘
-- **정규표현식** - 텍스트 처리 및 문장 분리
+## 🔧 기술 스택 및 특징
+- **Python 3.7+**
+- **Typer**: CLI 프레임워크
+- **TF-IDF**: 키워드 추출 알고리즘
+- **정규표현식**: 텍스트/문장 처리
+- **다국어 지원**: 한글/영어/혼합 자동 감지 및 최적화
+- **불용어/패턴/길이**: 언어별 최적화
+- **중복/중첩 없는 키워드 강조**
 
-## 🧪 현재 테스트 가능한 기능
-
-### 다양한 텍스트 요약 테스트
+## 🧪 테스트 및 샘플 파일
 ```bash
-# 기본 샘플 텍스트 (TF-IDF 키워드 추출)
+# 한글 샘플
 python -m email_summarizer sample/sample.txt --highlight --verbose
 
-# 이메일 형태 텍스트
-python -m email_summarizer sample/sample_email.txt --verbose
+# 영어 샘플
+python -m email_summarizer sample/sample_english.txt --highlight --verbose
 
-# 기술 문서 형태 텍스트
-python -m email_summarizer sample/sample_article.txt --highlight
-
-# 오류 처리 테스트
-python -m email_summarizer nonexistent.txt
-
-# 빈 파일 테스트
-echo "" > empty.txt
-python -m email_summarizer empty.txt
+# 혼합 샘플
+python -m email_summarizer sample/sample_mixed.txt --highlight --verbose
 ```
 
-### 현재 출력 예시 (4단계 완료 후)
+### 출력 예시 (영어, 중첩 없는 키워드 강조)
 ```
-📁 파일 읽는 중: sample\sample.txt
-✅ 파일 읽기 완료 (517자)
-🔍 텍스트 검증 완료
-📊 요약 설정: 길이=short, 언어=ko, 강조=True
-🤖 AI 요약 생성 중...
-✅ 요약 생성 완료
+## **system** Architecture
 
-📝 요약 결과:
+The **system** consists of several **key** modules that work together to deliver high-quality summaries:
 
-이 **시스템은** 자연어 처리 기술을 활용하여 긴 텍스트를 간결하게 요약하는 **기능을** 제공합니다. 주요 특징으로는 키워드 추출, 문장 중요도 분석, 그리고 다양한 길이의 요약 생성이 있습니다. 개발 과정에서 가장 **중요한** 것은 사용자 경험을 고려한 직관적인 인터페이스 설계입니다.
+1. **Keyword Extraction Algorithm**: Implements TF-IDF based **keyword** identification
+4. **Summary Generation Module**: Selects and combines the most **important** sentences
+...
 
 🔑 주요 키워드 (중요도 순):
-  1. **시스템은** (점수: 0.52)
-  2. **기능을** (점수: 0.52)
-  3. **시스템의** (점수: 0.52)
-  4. **중요한** (점수: 0.52)
-  5. **시스템에** (점수: 0.52)
+  1. **keyword** (점수: 0.53)
+  2. **important** (점수: 0.51)
+  3. **key** (점수: 0.51)
+  4. **domain** (점수: 0.50)
+  5. **system** (점수: 0.32)
 
-📊 요약 통계:
-  • 원본 길이: 517자
-  • 요약 길이: 151자
-  • 압축률: 70.8%
-  • 문장 수: 12개 → 3개
+🌐 언어 정보: 감지됨=영어, 처리됨=영어
 ```
 
 ## 🎯 다음 단계
 
-현재 **4단계까지 완료**되었으며, 다음은 **5단계: 다국어 지원 및 고급 기능**입니다.
+현재 **5단계까지 완료**되었으며, 다음은 **6단계: 웹 API 및 고급 기능**입니다.
 
-### 4단계 구현 완료 내용
-- ✅ TF-IDF 기반 키워드 추출 알고리즘
-- ✅ 향상된 키워드 강조 (중요도별 색상 구분)
-- ✅ 중요도 기반 정렬 및 점수 표시
-- ✅ 개선된 문장 중요도 분석 (위치, 길이, 패턴 매칭)
-- ✅ CLI 구조 개선 (직관적인 명령어)
-- ✅ 상세한 통계 정보 제공
+### 5단계 구현 완료 내용
+- ✅ 다국어(한글/영어/혼합) 자동 감지 및 처리
+- ✅ 영어/혼합 키워드 강조(복수형, 대소문자, 중첩 방지)
+- ✅ CLI 옵션 및 샘플 파일 확장
+- ✅ 상세한 통계/언어 정보 제공
 
-### 5단계 구현 계획
-1. 영어 텍스트 처리 개선 및 다국어 지원 확대
-2. 더 정교한 불용어 처리 및 문장 유사도 분석
-3. 요약 품질 평가 기능 추가
-4. 웹 API 인터페이스 개발
+### 6단계 구현 계획
+1. FastAPI 기반 RESTful API
+2. 문장 유사도, 감정 분석 등 고급 기능
+3. 사용자 정의 옵션/설정
 
 ## 🤝 기여하기
 1. Fork the repository
