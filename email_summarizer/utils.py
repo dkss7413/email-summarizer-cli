@@ -6,6 +6,76 @@ from typing import Optional, Tuple
 from pathlib import Path
 
 
+def read_text_file(file_path: Path) -> str:
+    """
+    파일에서 텍스트를 읽어옵니다.
+    
+    Args:
+        file_path: 읽을 파일 경로 (Path 객체)
+        
+    Returns:
+        str: 텍스트 내용
+        
+    Raises:
+        FileNotFoundError: 파일을 찾을 수 없는 경우
+        PermissionError: 파일 읽기 권한이 없는 경우
+        UnicodeDecodeError: 파일 인코딩을 읽을 수 없는 경우
+    """
+    # 파일 존재 여부 확인
+    if not file_path.exists():
+        raise FileNotFoundError(f"파일을 찾을 수 없습니다: {file_path}")
+    
+    # 파일 크기 확인 (100MB 제한)
+    file_size = file_path.stat().st_size
+    if file_size > 100 * 1024 * 1024:  # 100MB
+        raise ValueError(f"파일이 너무 큽니다: {file_size / (1024*1024):.1f}MB (최대 100MB)")
+    
+    # 다양한 인코딩으로 파일 읽기 시도
+    encodings = ['utf-8', 'cp949', 'euc-kr', 'latin-1']
+    
+    for encoding in encodings:
+        try:
+            with open(file_path, 'r', encoding=encoding) as f:
+                content = f.read()
+            
+            # 빈 파일 확인
+            if not content.strip():
+                raise ValueError("파일이 비어있습니다.")
+                
+            return content
+            
+        except UnicodeDecodeError:
+            continue  # 다음 인코딩 시도
+    
+    # 모든 인코딩 시도 실패
+    raise UnicodeDecodeError(f"파일 인코딩을 읽을 수 없습니다. 지원되는 인코딩: {', '.join(encodings)}")
+
+
+def validate_text(text: str, min_length: int = 10) -> bool:
+    """
+    텍스트 내용을 검증합니다.
+    
+    Args:
+        text: 검증할 텍스트
+        min_length: 최소 길이
+        
+    Returns:
+        bool: 유효성 여부
+    """
+    if not text:
+        return False
+    
+    if len(text.strip()) < min_length:
+        return False
+    
+    # 특수 문자만 있는 경우 확인
+    import re
+    if re.match(r'^[\s\W]+$', text):
+        return False
+    
+    return True
+
+
 def read_file_content(file_path: str) -> Tuple[str, Optional[str]]:
     """
     파일에서 텍스트를 읽어옵니다.

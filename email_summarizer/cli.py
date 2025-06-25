@@ -2,68 +2,104 @@
 import sys
 import typer
 from typing import Optional
+from pathlib import Path
 from . import utils
 from . import summarizer
 
-app = typer.Typer(help="AI 기반 이메일/메시지 요약 CLI 도구")
+app = typer.Typer(
+    name="email-summarizer",
+    help="AI 기반 이메일/메시지 요약 CLI 도구",
+    add_completion=False
+)
 
-@app.callback()
-def main():
-    """
-    AI 기반 이메일/메시지 요약 CLI 도구
-    """
-    pass
-
-@app.command(name="summarize")
-def summarize_command(
-    input: Optional[str] = typer.Option(None, "--input", "-i", help="입력 파일 경로. 생략 시 표준입력 사용."),
-    length: str = typer.Option("short", "--length", "-l", help="요약 길이: short 또는 long", show_default=True),
-    language: str = typer.Option("ko", "--language", "-lang", help="요약 언어: ko 또는 en", show_default=True),
-    highlight: bool = typer.Option(False, "--highlight", "-hl", help="키워드 강조 출력 여부", show_default=True),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="상세 정보 출력", show_default=True),
+@app.command()
+def main(
+    file: Optional[Path] = typer.Argument(
+        None,
+        help="요약할 텍스트 파일 경로 (지정하지 않으면 표준입력 사용)"
+    ),
+    length: str = typer.Option(
+        "short",
+        "--length", "-l",
+        help="요약 길이 (short/long)",
+        case_sensitive=False
+    ),
+    language: str = typer.Option(
+        "ko",
+        "--language", "--lang",
+        help="언어 (ko/en)",
+        case_sensitive=False
+    ),
+    highlight: bool = typer.Option(
+        False,
+        "--highlight", "-h",
+        help="키워드 강조 표시 (색상 및 굵기)"
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose", "-v",
+        help="상세 정보 출력"
+    )
 ):
     """
-    입력 파일 또는 표준입력으로부터 텍스트를 받아 요약 결과를 출력합니다.
+    AI 기반 이메일/메시지 요약 CLI 도구
+    
+    파일에서 텍스트를 읽어 요약을 생성합니다.
     """
-    # 입력 텍스트 읽기
-    text, error = "", None
-    
-    if input:
-        # 파일에서 읽기
-        text, error = utils.read_file_content(input)
-        if error:
-            typer.echo(f"[오류] {error}", err=True)
-            raise typer.Exit(code=1)
-    else:
-        # 표준입력에서 읽기
-        text, error = utils.read_stdin_content()
-        if error:
-            typer.echo(f"[오류] {error}", err=True)
-            raise typer.Exit(code=1)
-    
-    # 텍스트 검증
-    is_valid, validation_error = utils.validate_text_content(text)
-    if not is_valid:
-        typer.echo(f"[오류] {validation_error}", err=True)
-        raise typer.Exit(code=1)
-    
-    # 상세 정보 출력 (verbose 모드)
-    if verbose:
-        source_info = utils.get_input_source_info(input)
-        typer.echo(f"[정보] 입력 소스: {source_info}")
-        typer.echo(f"[정보] 텍스트 길이: {len(text):,}자")
-        typer.echo(f"[정보] 요약 설정: 길이={length}, 언어={language}, 강조={highlight}")
-        typer.echo(f"[정보] 텍스트 미리보기: {utils.format_text_preview(text)}")
-        typer.echo("─" * 50)
-    
-    # 요약 실행
     try:
-        summary_result = summarizer.summarize_text(text, length=length, language=language)
+        # 입력 텍스트 읽기
+        if file:
+            if verbose:
+                typer.echo(f"📁 파일 읽는 중: {file}")
+            
+            text = utils.read_text_file(file)
+            if verbose:
+                typer.echo(f"✅ 파일 읽기 완료 ({len(text)}자)")
+        else:
+            if verbose:
+                typer.echo("📝 표준입력에서 텍스트 읽는 중...")
+            
+            text = sys.stdin.read()
+            if verbose:
+                typer.echo(f"✅ 표준입력 읽기 완료 ({len(text)}자)")
         
-        # 요약 결과 출력
-        formatted_output = summarizer.format_summary_output(summary_result, highlight=highlight)
+        # 텍스트 검증
+        if not utils.validate_text(text):
+            typer.echo("❌ 유효하지 않은 텍스트입니다.", err=True)
+            raise typer.Exit(1)
+        
+        if verbose:
+            typer.echo(f"🔍 텍스트 검증 완료")
+            typer.echo(f"📊 요약 설정: 길이={length}, 언어={language}, 강조={highlight}")
+        
+        # 요약 생성
+        if verbose:
+            typer.echo("🤖 AI 요약 생성 중...")
+        
+        summary_result = summarizer.summarize_text(text, length, language)
+        
+        if verbose:
+            typer.echo("✅ 요약 생성 완료")
+        
+        # 결과 출력
+        formatted_output = summarizer.format_summary_output(summary_result, highlight)
         typer.echo(formatted_output)
         
+    except FileNotFoundError:
+        typer.echo(f"❌ 파일을 찾을 수 없습니다: {file}", err=True)
+        raise typer.Exit(1)
+    except PermissionError:
+        typer.echo(f"❌ 파일에 접근할 권한이 없습니다: {file}", err=True)
+        raise typer.Exit(1)
+    except UnicodeDecodeError as e:
+        typer.echo(f"❌ 파일 인코딩 오류: {e}", err=True)
+        raise typer.Exit(1)
     except Exception as e:
-        typer.echo(f"[오류] 요약 처리 중 오류가 발생했습니다: {str(e)}", err=True)
-        raise typer.Exit(code=1) 
+        typer.echo(f"❌ 오류가 발생했습니다: {e}", err=True)
+        if verbose:
+            import traceback
+            typer.echo(traceback.format_exc(), err=True)
+        raise typer.Exit(1)
+
+if __name__ == "__main__":
+    app() 
