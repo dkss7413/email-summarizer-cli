@@ -18,14 +18,14 @@
 - [x] 오류 처리 및 사용자 피드백
 - [x] 상세 정보 출력 (`--verbose` 옵션)
 
-### 🔄 3단계: 간단한 요약 알고리즘으로 MVP 동작 확인 (진행 예정)
-- [ ] 문장 추출 기반 요약 로직
-- [ ] 기본 출력 포맷 구현
-- [ ] MVP 동작 테스트
+### ✅ 3단계: 간단한 요약 알고리즘으로 MVP 동작 확인
+- [x] 문장 추출 기반 요약 로직
+- [x] 기본 출력 포맷 구현
+- [x] MVP 동작 테스트
 
-### ⏳ 4단계: 키워드 추출 및 강조 기능 추가
-- [ ] 키워드 추출 알고리즘
-- [ ] 키워드 강조 출력
+### 🔄 4단계: 키워드 추출 및 강조 기능 추가 (진행 예정)
+- [ ] 키워드 추출 알고리즘 개선
+- [ ] 키워드 강조 출력 개선
 - [ ] 중요도 기반 정렬
 
 ### ⏳ 5단계: 예외/오류 처리 및 도움말 강화
@@ -60,18 +60,24 @@ python -m email_summarizer --help
 python -m email_summarizer summarize --help
 ```
 
-## �� 현재 사용법
+## 📖 현재 사용법
 
 ### 기본 사용법
 ```bash
-# 파일에서 텍스트 요약 (현재는 미리보기만)
-python -m email_summarizer summarize --input sample.txt
+# 파일에서 텍스트 요약
+python -m email_summarizer summarize --input sample/sample.txt
 
 # 상세 정보와 함께 요약
-python -m email_summarizer summarize --input sample.txt --verbose
+python -m email_summarizer summarize --input sample/sample.txt --verbose
 
-# 다른 옵션들 (아직 요약 로직 미구현)
-python -m email_summarizer summarize --input sample.txt --length long --language en
+# 긴 요약
+python -m email_summarizer summarize --input sample/sample.txt --length long
+
+# 키워드 강조
+python -m email_summarizer summarize --input sample/sample.txt --highlight
+
+# 모든 옵션 조합
+python -m email_summarizer summarize --input sample/sample.txt --length long --highlight --verbose
 ```
 
 ### 현재 지원하는 옵션
@@ -91,10 +97,13 @@ email-summarizer-cli/
 │   ├── __main__.py          # 모듈 실행 엔트리포인트
 │   ├── cli.py              # Typer CLI 구현 ✅
 │   ├── utils.py            # 입력 처리 및 유틸리티 함수 ✅
-│   └── summarizer.py       # 요약 로직 (구현 예정) 🔄
+│   └── summarizer.py       # 요약 로직 ✅
+├── sample/                 # 샘플 파일들
+│   ├── sample.txt          # 기본 테스트용 샘플 파일
+│   ├── sample_email.txt    # 이메일 형태 샘플 파일
+│   └── sample_article.txt  # 기술 문서 형태 샘플 파일
 ├── tests/
 │   └── test_summarizer.py  # 테스트 코드 (작성 예정) ⏳
-├── sample.txt              # 테스트용 샘플 파일
 ├── requirements.txt        # 의존성 목록
 ├── setup.py               # 패키지 설정
 └── README.md              # 프로젝트 문서
@@ -108,10 +117,16 @@ email-summarizer-cli/
 
 ## 🧪 현재 테스트 가능한 기능
 
-### 입력 처리 테스트
+### 다양한 텍스트 요약 테스트
 ```bash
-# 정상 파일 입력 (권장)
-python -m email_summarizer summarize --input sample.txt --verbose
+# 기본 샘플 텍스트
+python -m email_summarizer summarize --input sample/sample.txt --verbose
+
+# 이메일 형태 텍스트
+python -m email_summarizer summarize --input sample/sample_email.txt --verbose
+
+# 기술 문서 형태 텍스트
+python -m email_summarizer summarize --input sample/sample_article.txt --verbose
 
 # 오류 처리 테스트
 python -m email_summarizer summarize --input nonexistent.txt
@@ -119,41 +134,51 @@ python -m email_summarizer summarize --input nonexistent.txt
 # 빈 파일 테스트
 echo "" > empty.txt
 python -m email_summarizer summarize --input empty.txt
-
-# 인코딩 테스트 (다양한 인코딩 지원)
-python -m email_summarizer summarize --input sample.txt --verbose
 ```
 
 ### 현재 출력 예시
 ```
-[정보] 입력 소스: 파일: sample.txt (393 bytes)
-[정보] 텍스트 길이: 393자
+[정보] 입력 소스: 파일: sample/sample_email.txt (1,234 bytes)
+[정보] 텍스트 길이: 1,234자
 [정보] 요약 설정: 길이=short, 언어=ko, 강조=False
-[정보] 텍스트 미리보기: 안녕하세요! 이것은 AI 기반 이메일/메시지 요약 CLI 도구의 테스트를 위한 샘플 텍스트입니다...
+[정보] 텍스트 미리보기: 제목: [회의 안내] 2024년 1분기 프로젝트 진행 상황 점검 회의...
 ──────────────────────────────────────────────────
-[DEBUG] 요약 시작 - 텍스트 길이: 393자
-[DEBUG] 설정: length=short, language=ko, highlight=False
 
 📝 요약 결과:
-(요약 로직이 아직 구현되지 않았습니다)
-입력 텍스트: 안녕하세요! 이것은 AI 기반 이메일/메시지 요약 CLI 도구의 테스트를 위한 샘플 텍스트입니다...
+
+2024년 1분기 프로젝트 진행 상황을 점검하고 2분기 계획을 수립하기 위한 회의를 개최하고자 합니다. 회의 일정: - 일시: 2024년 4월 15일 (월) 오후 2시 ~ 4시 - 장소: 3층 대회의실 - 참석자: 개발팀 전체, 기획팀 대표, 디자인팀 대표. 회의 안건: 1. 1분기 프로젝트 진행 상황 리뷰 2. 2분기 프로젝트 계획 수립 3. 팀 운영 개선사항 논의.
+
+🔑 주요 키워드:
+  • 회의 (5회)
+  • 프로젝트 (4회)
+  • 진행 (3회)
+  • 계획 (2회)
+  • 팀 (2회)
+
+📊 요약 통계:
+  • 원본 길이: 1,234자
+  • 요약 길이: 456자
+  • 압축률: 63.0%
+  • 문장 수: 15개 → 3개
 ```
 
 ## 🎯 다음 단계
 
-현재 **2단계까지 완료**되었으며, 다음은 **3단계: 간단한 요약 알고리즘 구현**입니다.
+현재 **3단계까지 완료**되었으며, 다음은 **4단계: 키워드 추출 및 강조 기능 추가**입니다.
 
-### 3단계 구현 계획
-1. `summarizer.py` 파일 생성
-2. 문장 추출 기반 요약 로직 구현
-3. CLI와 요약 로직 연동
-4. 기본 출력 포맷 구현
+### 3단계 구현 완료 내용
+- ✅ 문장 추출 기반 요약 알고리즘
+- ✅ 키워드 추출 및 빈도수 계산
+- ✅ 문장 중요도 점수 계산
+- ✅ 요약 길이 조절 (short/long)
+- ✅ 키워드 강조 출력
+- ✅ 상세한 통계 정보 제공
 
-### 예상 결과
-```bash
-python -m email_summarizer summarize --input sample.txt --verbose
-```
-실행 시 실제 요약 결과가 출력될 예정입니다.
+### 4단계 구현 계획
+1. 키워드 추출 알고리즘 개선 (TF-IDF, Word2Vec 등)
+2. 키워드 강조 출력 개선 (색상, 굵기 등)
+3. 중요도 기반 정렬 및 필터링
+4. 다국어 키워드 추출 지원
 
 ## 🤝 기여하기
 1. Fork the repository
