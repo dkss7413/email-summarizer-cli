@@ -3,6 +3,7 @@ import sys
 import typer
 from typing import Optional
 from . import utils
+from . import summarizer
 
 app = typer.Typer(help="AI 기반 이메일/메시지 요약 CLI 도구")
 
@@ -55,11 +56,14 @@ def summarize_command(
         typer.echo(f"[정보] 텍스트 미리보기: {utils.format_text_preview(text)}")
         typer.echo("─" * 50)
     
-    # TODO: 요약 함수 호출 및 결과 출력
-    typer.echo(f"[DEBUG] 요약 시작 - 텍스트 길이: {len(text):,}자")
-    typer.echo(f"[DEBUG] 설정: length={length}, language={language}, highlight={highlight}")
-    
-    # 임시 결과 (실제 요약 로직 연동 전)
-    typer.echo("\n📝 요약 결과:")
-    typer.echo("(요약 로직이 아직 구현되지 않았습니다)")
-    typer.echo(f"입력 텍스트: {text[:100]}...") 
+    # 요약 실행
+    try:
+        summary_result = summarizer.summarize_text(text, length=length, language=language)
+        
+        # 요약 결과 출력
+        formatted_output = summarizer.format_summary_output(summary_result, highlight=highlight)
+        typer.echo(formatted_output)
+        
+    except Exception as e:
+        typer.echo(f"[오류] 요약 처리 중 오류가 발생했습니다: {str(e)}", err=True)
+        raise typer.Exit(code=1) 
