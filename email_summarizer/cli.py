@@ -25,9 +25,9 @@ def main(
         case_sensitive=False
     ),
     language: str = typer.Option(
-        "ko",
+        "auto",
         "--language", "--lang",
-        help="언어 (ko/en)",
+        help="언어 설정 (ko/en/mixed/auto) - auto는 자동 감지",
         case_sensitive=False
     ),
     highlight: bool = typer.Option(
@@ -45,6 +45,7 @@ def main(
     AI 기반 이메일/메시지 요약 CLI 도구
     
     파일에서 텍스트를 읽어 요약을 생성합니다.
+    자동 언어 감지 기능을 지원합니다.
     """
     try:
         # 입력 텍스트 읽기
