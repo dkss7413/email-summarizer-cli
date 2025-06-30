@@ -1,5 +1,5 @@
 # requirements.txt 
-sentence-transformers
-scikit-learn
+transformers
+torch
+sentencepiece
 numpy
-transformers 

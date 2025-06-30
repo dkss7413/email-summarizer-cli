@@ -69,14 +69,11 @@ python -m email_summarizer sample/sample.txt
 # 파일에서 텍스트 요약 (언어 자동 감지)
 python -m email_summarizer --file sample/sample.txt
 
-# 상세 정보와 함께 요약
-python -m email_summarizer --file sample/sample.txt --verbose
-
-# 긴 요약
-python -m email_summarizer --file sample/sample.txt --length long
-
 # 키워드 강조 (색상 및 굵기)
 python -m email_summarizer --file sample/sample.txt --highlight
+
+# 키워드 강조 비활성화
+python -m email_summarizer --file sample/sample.txt --no-highlight
 
 # 영어/혼합 텍스트 요약 (자동 감지)
 python -m email_summarizer --file sample/sample_english.txt --highlight
@@ -90,7 +87,6 @@ echo "요약할 텍스트" | python -m email_summarizer --highlight
 | 옵션 | 축약 | 설명 | 기본값 |
 |------|------|------|--------|
 | `--file` | `-f` | 요약할 텍스트 파일 경로 | None (표준 입력) |
-| `--length` | `-l` | 요약 길이: `short`, `normal`, `long` | `normal` |
 | `--highlight` | - | 키워드 강조 출력 (색상 및 굵기) | `True` |
 | `--no-highlight` | - | 키워드 강조 비활성화 | - |
 
@@ -133,13 +129,13 @@ email-summarizer-cli/
 ## 🧪 테스트 및 샘플 파일
 ```bash
 # 한글 샘플
-python -m email_summarizer --file sample/sample.txt --highlight --verbose
+python -m email_summarizer --file sample/sample.txt --highlight
 
 # 영어 샘플
-python -m email_summarizer --file sample/sample_english.txt --highlight --verbose
+python -m email_summarizer --file sample/sample_english.txt --highlight
 
 # 혼합 샘플
-python -m email_summarizer --file sample/sample_mixed.txt --highlight --verbose
+python -m email_summarizer --file sample/sample_mixed.txt --highlight
 ```
 
 ### 출력 예시 (AI 모델 기반 요약 및 감정 분석)
@@ -148,15 +144,8 @@ python -m email_summarizer --file sample/sample_mixed.txt --highlight --verbose
 
 이 문서는 AI-powered text summarization system의 다국어 지원 기능에 대해 설명합니다. The system automatically detects the language of input text using character pattern analysis. 각 언어별로 최적화된 처리를 제공합니다.
 
-🔑 주요 키워드:
-  1. system (TF-IDF: 0.085)
-  2. 언어 (TF-IDF: 0.082)
-  3. detection (TF-IDF: 0.078)
-  4. processing (TF-IDF: 0.075)
-  5. 기능 (TF-IDF: 0.072)
-
 🌐 언어 감지: Mixed
-😊 감정 분석: 4 stars (신뢰도: 0.85)
+😊 감정 분석: 중립적 (신뢰도: 보통)
 
 📊 통계:
   • 원본 길이: 2,450자
