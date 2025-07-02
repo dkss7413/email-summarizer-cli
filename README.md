@@ -38,6 +38,8 @@
 - [x] **MMR (Maximal Marginal Relevance) 알고리즘으로 요약 품질 향상**
 - [x] **감정 분석 기능 추가 (BERT 기반 다국어 모델)**
 - [x] **문장 유사도 기반 클러스터링 요약**
+- [x] **seq2seq 기반(BART/KoBART) 요약 모델로 교체**
+  - Sentence Transformers 기반 추출 요약에서 벗어나, 문맥을 이해하는 BART/KoBART 기반 생성 요약 모델로 전환했습니다.
 - [ ] 성능 최적화 및 안정성 개선
 
 ## 🛠️ 설치 및 실행
@@ -115,7 +117,6 @@ email-summarizer-cli/
 ## 🔧 기술 스택 및 특징
 - **Python 3.7+**
 - **Typer**: CLI 프레임워크
-- **Sentence Transformers**: 다국어 임베딩 모델 (`paraphrase-multilingual-MiniLM-L12-v2`)
 - **Transformers**: BERT 기반 감정 분석 모델 (`nlptown/bert-base-multilingual-uncased-sentiment`)
 - **Scikit-learn**: 코사인 유사도, 클러스터링
 - **NumPy**: 수치 계산 및 배열 처리
@@ -125,6 +126,7 @@ email-summarizer-cli/
 - **다국어 지원**: 한글/영어/혼합 자동 감지 및 최적화
 - **불용어/패턴/길이**: 언어별 최적화
 - **중복/중첩 없는 키워드 강조**
+- **seq2seq 기반(BART/KoBART) 요약 모델로 교체**
 
 ## 🧪 테스트 및 샘플 파일
 ```bash
@@ -165,3 +167,17 @@ python -m email_summarizer --file sample/sample_mixed.txt --highlight
 
 ## 📞 문의
 프로젝트에 대한 질문이나 제안사항이 있으시면 이슈를 생성해 주세요.
+
+### 🔑 credentials.json 생성 및 위치 안내
+
+- Gmail 등 Google API 연동을 위해서는 `credentials.json` 파일이 필요합니다.
+- [Google Cloud Console](https://console.cloud.google.com/)에서 OAuth 2.0 클라이언트 ID를 생성하고, 다운로드한 `credentials.json` 파일을 프로젝트 루트(최상위 폴더)에 위치시켜 주세요.
+- 예시 경로:
+  ```
+  email-summarizer-cli/
+  ├── credentials.json  # ← 여기에 위치
+  ├── email_summarizer/
+  ├── sample/
+  └── ...
+  ```
+- 이 파일은 개인정보를 포함하므로 `.gitignore`에 반드시 추가해야 하며, 외부에 공유하지 않도록 주의하세요.
