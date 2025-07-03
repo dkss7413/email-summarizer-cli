@@ -190,20 +190,27 @@ class EmailSummarizerGUI:
                 else:
                     max_length, min_length = None, None
                 
+                # 하이라이트 옵션
+                highlight = self.highlight_keywords.get()
                 result = summarize_system_seq2seq(
                     text, 
                     max_length=max_length,
                     min_length=min_length,
-                    highlight=self.highlight_keywords.get()
+                    highlight=False  # GUI에서는 ANSI 코드 없이 원본만 받음
                 )
                 
                 if result:
-                    formatted_result = format_seq2seq_summary(result, highlight=self.highlight_keywords.get())
+                    summary_text = result["summary"]
+                    keywords = result["keywords"]
+                    formatted_result = format_seq2seq_summary(result, highlight=False)
                     self.result_text.delete(1.0, tk.END)
                     self.result_text.insert(1.0, formatted_result)
+                    # 하이라이트 적용 (텍스트 태그)
+                    if highlight:
+                        self.apply_highlight_to_text_widget(summary_text, keywords)
                 else:
                     messagebox.showerror("오류", "요약에 실패했습니다.")
-                    
+                
             except Exception as e:
                 messagebox.showerror("오류", f"요약 중 오류 발생: {str(e)}")
             finally:
@@ -211,6 +218,28 @@ class EmailSummarizerGUI:
                 self.summarize_btn.config(state='normal')
         
         threading.Thread(target=summarize_thread, daemon=True).start()
+
+    def apply_highlight_to_text_widget(self, summary_text, keywords):
+        # 요약 결과 텍스트에서 키워드 위치마다 태그로 강조
+        self.result_text.tag_configure("highlight", foreground="#00cccc", font=("Arial", 10, "bold"))
+        content = self.result_text.get(1.0, tk.END)
+        # summary_text가 실제로 출력된 위치를 찾아야 함
+        # (format_seq2seq_summary의 출력에서 요약문은 3번째 줄)
+        lines = content.splitlines()
+        if len(lines) < 3:
+            return
+        summary_line_idx = 2  # 0-based index
+        summary_line = lines[summary_line_idx]
+        start_idx = f"{summary_line_idx+1}.0"
+        for keyword, _ in keywords:
+            if not keyword.strip():
+                continue
+            idx = summary_line.find(keyword)
+            while idx != -1:
+                tag_start = f"{summary_line_idx+1}.{idx}"
+                tag_end = f"{summary_line_idx+1}.{idx+len(keyword)}"
+                self.result_text.tag_add("highlight", tag_start, tag_end)
+                idx = summary_line.find(keyword, idx+len(keyword))
 
 
 # Gmail 이메일 선택 다이얼로그를 관리하는 클래스입니다.
