@@ -19,8 +19,7 @@ class EmailSummarizerGUI:
         
         # 변수들
         self.current_text = tk.StringVar()
-        self.max_length = tk.IntVar(value=150)
-        self.min_length = tk.IntVar(value=40)
+        self.length_option = tk.StringVar(value="auto")  # 'short', 'long', 'auto'
         self.highlight_keywords = tk.BooleanVar(value=True)
         
         self.setup_ui()
@@ -59,12 +58,11 @@ class EmailSummarizerGUI:
         settings_frame = ttk.LabelFrame(main_frame, text="요약 설정", padding="10")
         settings_frame.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
         
-        # 최대/최소 길이 설정
-        ttk.Label(settings_frame, text="최대 길이:").grid(row=0, column=0, padx=(0, 5))
-        ttk.Spinbox(settings_frame, from_=20, to=500, textvariable=self.max_length, width=10).grid(row=0, column=1, padx=(0, 20))
-        
-        ttk.Label(settings_frame, text="최소 길이:").grid(row=0, column=2, padx=(0, 5))
-        ttk.Spinbox(settings_frame, from_=10, to=200, textvariable=self.min_length, width=10).grid(row=0, column=3, padx=(0, 20))
+        # 요약 길이 라디오버튼
+        ttk.Label(settings_frame, text="요약 길이:").grid(row=0, column=0, padx=(0, 5))
+        ttk.Radiobutton(settings_frame, text="짧게", variable=self.length_option, value="short").grid(row=0, column=1)
+        ttk.Radiobutton(settings_frame, text="자동", variable=self.length_option, value="auto").grid(row=0, column=2)
+        ttk.Radiobutton(settings_frame, text="길게", variable=self.length_option, value="long").grid(row=0, column=3)
         
         ttk.Checkbutton(settings_frame, text="키워드 강조", 
                        variable=self.highlight_keywords).grid(row=0, column=4)
@@ -183,14 +181,24 @@ class EmailSummarizerGUI:
                 self.progress.start()
                 self.summarize_btn.config(state='disabled')
                 
+                # 길이 옵션 매핑
+                length = self.length_option.get()
+                if length == "short":
+                    max_length, min_length = 40, 15
+                elif length == "long":
+                    max_length, min_length = 250, 100
+                else:
+                    max_length, min_length = None, None
+                
                 result = summarize_system_seq2seq(
                     text, 
-                    max_length=self.max_length.get(),
-                    min_length=self.min_length.get()
+                    max_length=max_length,
+                    min_length=min_length,
+                    highlight=self.highlight_keywords.get()
                 )
                 
                 if result:
-                    formatted_result = format_seq2seq_summary(result)
+                    formatted_result = format_seq2seq_summary(result, highlight=self.highlight_keywords.get())
                     self.result_text.delete(1.0, tk.END)
                     self.result_text.insert(1.0, formatted_result)
                 else:

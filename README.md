@@ -111,8 +111,7 @@ python -m email_summarizer gui
 | `--file` | `-f` | 요약할 텍스트 파일 경로 | None (표준 입력) |
 | `--highlight` | - | 키워드 강조 출력 (색상 및 굵기) | `True` |
 | `--no-highlight` | - | 키워드 강조 비활성화 | - |
-| `--max-length` | - | 요약 최대 길이 (seq2seq 전용) | 자동 결정 |
-| `--min-length` | - | 요약 최소 길이 (seq2seq 전용) | 자동 결정 |
+| `--length` | - | 요약 길이 조절 (short: 짧게, long: 길게, auto: 자동) | auto |
 
 ## 🖥️ GUI 사용법
 
@@ -125,7 +124,7 @@ python -m email_summarizer gui
 1. 📁 파일 업로드
 2. 📧 Gmail 연동 (최근 10개 이메일 불러오기/요약)
 3. ✏️ 직접 입력
-4. ⚙️ 요약 길이/키워드 강조 등 설정
+4. ⚙️ 요약 길이 조절(짧게/길게/자동), 키워드 강조 등 설정
 5. 📊 실시간 진행(프로그레스바)
 6. 📋 결과 스크롤 출력
 

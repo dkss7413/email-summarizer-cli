@@ -126,7 +126,7 @@ def summarize_with_seq2seq(text: str, language: str, max_length=150, min_length=
 # 통합 파이프라인
 # ---------------------------
 # 텍스트를 자동으로 언어 감지, 요약, 감정 분석, 키워드 추출까지 한 번에 처리합니다.
-def summarize_system_seq2seq(text: str, max_length: int = None, min_length: int = None) -> Dict:
+def summarize_system_seq2seq(text: str, max_length: int = None, min_length: int = None, highlight: bool = True) -> Dict:
     if not text or len(text) < 30:
         return {"error": "⚠️ 입력이 너무 짧습니다. 최소한 2~3문장 이상의 텍스트를 입력해 주세요."}
 
@@ -155,18 +155,17 @@ def summarize_system_seq2seq(text: str, max_length: int = None, min_length: int 
     try:
         language = detect_language(text)
         summary = summarize_with_seq2seq(text, language, max_length=max_length, min_length=min_length)
-        # 요약 결과가 1문장 이하일 경우 min_length를 늘려서 한 번 더 시도
         summary_sentences = split_sentences(summary)
         if len(summary_sentences) <= 1 and min_length < 120:
             summary = summarize_with_seq2seq(text, language, max_length=max_length, min_length=120)
             summary_sentences = split_sentences(summary)
-        # 감정 분석: 원문 전체와 요약문 모두
         sentiment_label_full, sentiment_score_full = analyze_sentiment(text)
         sentiment_label_sum, sentiment_score_sum = analyze_sentiment(summary)
         keywords = extract_keywords(split_sentences(text), top_n=10)
-
+        # 키워드 강조 적용
+        summary_highlighted = highlight_keywords(summary, keywords) if highlight else summary
         return {
-            "summary": summary,
+            "summary": summary_highlighted,
             "keywords": keywords,
             "sentiment_full": (sentiment_label_full, sentiment_score_full),
             "sentiment_summary": (sentiment_label_sum, sentiment_score_sum),
@@ -183,7 +182,7 @@ def summarize_system_seq2seq(text: str, max_length: int = None, min_length: int 
 # 결과 출력
 # ---------------------------
 # 요약 결과(딕셔너리)를 보기 좋은 문자열로 포맷팅합니다.
-def format_seq2seq_summary(summary_result: Dict) -> str:
+def format_seq2seq_summary(summary_result: Dict, highlight: bool = True) -> str:
     if "error" in summary_result:
         return summary_result["error"]
 
@@ -194,7 +193,6 @@ def format_seq2seq_summary(summary_result: Dict) -> str:
     output.append("")
 
     output.append(f"🌐 언어 감지: {summary_result['detected_language']}")
-    # 감정 분석(요약) → 감정 분석 으로 텍스트 변경
     label_sum, score_sum = summary_result["sentiment_summary"]
     korean_sentiment_sum, confidence_level_sum = convert_sentiment_to_korean(label_sum, score_sum)
     output.append(f"😊 감정 분석: {korean_sentiment_sum} (신뢰도: {confidence_level_sum})")

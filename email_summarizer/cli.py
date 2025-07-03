@@ -23,11 +23,8 @@ def summarize(
     highlight: bool = typer.Option(
         True, "--highlight/--no-highlight", help="키워드 강조 표시 여부"
     ),
-    max_length: Optional[int] = typer.Option(
-        None, "--max-length", help="요약 최대 길이(토큰 수 기준, seq2seq 전용)", show_default=False
-    ),
-    min_length: Optional[int] = typer.Option(
-        None, "--min-length", help="요약 최소 길이(토큰 수 기준, seq2seq 전용)", show_default=False
+    length: str = typer.Option(
+        "auto", "--length", help="요약 길이 조절 (short: 짧게, long: 길게, auto: 자동)", show_default=True
     )
 ):
     """
@@ -56,10 +53,17 @@ def summarize(
     if len(text_only.strip()) < MIN_TEXT_LENGTH:
         typer.echo(f"❌ 본문이 너무 짧아 요약을 진행할 수 없습니다. (최소 {MIN_TEXT_LENGTH}자 필요)", err=True)
         raise typer.Exit(1)
+    # 길이 옵션 매핑
+    if length == "short":
+        max_length, min_length = 40, 15
+    elif length == "long":
+        max_length, min_length = 250, 100
+    else:
+        max_length, min_length = None, None
     # 문맥 기반 요약 실행
-    result = summarize_system_seq2seq(text, max_length=max_length, min_length=min_length)
+    result = summarize_system_seq2seq(text, max_length=max_length, min_length=min_length, highlight=highlight)
     if result:
-        typer.echo(format_seq2seq_summary(result))
+        typer.echo(format_seq2seq_summary(result, highlight=highlight))
     else:
         typer.echo("❌ 요약에 실패했습니다.", err=True)
 
