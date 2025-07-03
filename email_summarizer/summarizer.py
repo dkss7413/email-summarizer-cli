@@ -19,6 +19,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # ---------------------------
 # 언어 감지
 # ---------------------------
+# 입력 텍스트에서 한글/영문 비율을 기반으로 언어를 감지합니다.
 def detect_language(text):
     korean_count = len(re.findall(r'[가-힣]', text))
     english_count = len(re.findall(r'[a-zA-Z]', text))
@@ -32,6 +33,7 @@ def detect_language(text):
 # ---------------------------
 # 문장 분리
 # ---------------------------
+# 입력 텍스트를 문장 단위로 분리합니다.
 def split_sentences(text):
     sentence_endings = re.compile(r'(?<=[.!?。！？])\s+|\n+')
     return [s.strip() for s in sentence_endings.split(text) if s.strip()]
@@ -39,6 +41,7 @@ def split_sentences(text):
 # ---------------------------
 # 키워드 추출
 # ---------------------------
+# 문장 리스트에서 불용어를 제외한 주요 단어(키워드)를 TF-IDF 방식으로 추출합니다.
 def extract_keywords(sentences, top_n=10):
     korean_stopwords = {'있다', '없다', '하다', '되다', '보다', '생각하다', '것', '수', '이', '가', '을', '를', '은', '는', '에', '의', '로', '과', '도'}
     english_stopwords = {'the', 'and', 'is', 'are', 'to', 'in', 'that', 'it', 'with', 'as', 'for', 'on', 'was', 'this'}
@@ -62,8 +65,9 @@ def extract_keywords(sentences, top_n=10):
     return sorted(tf_idf_scores.items(), key=lambda x: x[1], reverse=True)[:top_n]
 
 # ---------------------------
-# 감정 분석 (CPU만 사용됨)
+# 감정 분석 (BERT 기반)
 # ---------------------------
+# 입력 텍스트의 감정(긍정/부정/중립 등)을 분석합니다.
 sentiment_analyzer = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
 
 def analyze_sentiment(text):
@@ -78,6 +82,7 @@ def analyze_sentiment(text):
     score = result[0]['score']
     return label, score
 
+# 감정 분석 결과(영문 라벨)를 한글로 변환합니다.
 def convert_sentiment_to_korean(label, score):
     sentiment_map = {
         "1 star": "매우 부정적", "2 stars": "부정적",
@@ -88,8 +93,9 @@ def convert_sentiment_to_korean(label, score):
     return korean_sentiment, confidence_level
 
 # ---------------------------
-# 요약 수행 (GPU 사용)
+# 요약 수행 (seq2seq)
 # ---------------------------
+# 입력 텍스트와 언어에 따라 BART/KoBART 모델로 요약을 생성합니다.
 def summarize_with_seq2seq(text: str, language: str, max_length=150, min_length=40) -> str:
     if language == "Korean":
         tokenizer = PreTrainedTokenizerFast.from_pretrained('digit82/kobart-summarization')
@@ -119,6 +125,7 @@ def summarize_with_seq2seq(text: str, language: str, max_length=150, min_length=
 # ---------------------------
 # 통합 파이프라인
 # ---------------------------
+# 텍스트를 자동으로 언어 감지, 요약, 감정 분석, 키워드 추출까지 한 번에 처리합니다.
 def summarize_system_seq2seq(text: str, max_length: int = None, min_length: int = None) -> Dict:
     if not text or len(text) < 30:
         return {"error": "⚠️ 입력이 너무 짧습니다. 최소한 2~3문장 이상의 텍스트를 입력해 주세요."}
@@ -175,6 +182,7 @@ def summarize_system_seq2seq(text: str, max_length: int = None, min_length: int 
 # ---------------------------
 # 결과 출력
 # ---------------------------
+# 요약 결과(딕셔너리)를 보기 좋은 문자열로 포맷팅합니다.
 def format_seq2seq_summary(summary_result: Dict) -> str:
     if "error" in summary_result:
         return summary_result["error"]

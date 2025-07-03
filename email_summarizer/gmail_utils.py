@@ -16,6 +16,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 TOKEN_PATH = str(PROJECT_ROOT / "token.pickle")
 CREDENTIALS_PATH = str(PROJECT_ROOT / "credentials.json")
 
+# Gmail API 인증 및 서비스 객체를 반환합니다.
 def get_gmail_service():
     creds = None
     if os.path.exists(TOKEN_PATH):
@@ -32,6 +33,7 @@ def get_gmail_service():
     service = build('gmail', 'v1', credentials=creds)
     return service
 
+# 최근 이메일 목록(기본 10개)을 불러와서 보낸이, 제목, 날짜 정보를 리스트로 반환합니다.
 def list_recent_emails(max_results=10) -> List[Dict]:
     service = get_gmail_service()
     results = service.users().messages().list(userId='me', maxResults=max_results, q='category:primary').execute()
@@ -48,6 +50,7 @@ def list_recent_emails(max_results=10) -> List[Dict]:
         })
     return email_list
 
+# 이메일 원문(raw)에서 텍스트(plain/html)를 robust하게 추출합니다.
 def extract_text_from_email(raw_email):
     # 표준 라이브러리 email로 robust하게 파싱
     msg = BytesParser(policy=policy.default).parsebytes(raw_email.encode('utf-8', errors='replace'))
@@ -77,6 +80,7 @@ def extract_text_from_email(raw_email):
     else:
         return ''
 
+# 특정 이메일 메시지 ID로부터 본문 텍스트를 추출합니다.
 def get_email_body(message_id: str) -> str:
     service = get_gmail_service()
     try:

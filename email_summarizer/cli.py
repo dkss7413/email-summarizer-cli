@@ -15,6 +15,7 @@ app = typer.Typer(
 )
 
 @app.command()
+# 텍스트 파일 또는 표준 입력을 받아 AI로 요약합니다.
 def summarize(
     file: Optional[Path] = typer.Option(
         None, "--file", "-f", help="요약할 텍스트 파일 경로"
@@ -63,6 +64,7 @@ def summarize(
         typer.echo("❌ 요약에 실패했습니다.", err=True)
 
 @app.command()
+# Gmail에서 최근 메일을 불러오고, 선택한 메일을 요약합니다.
 def gmail():
     """
     Gmail API로 최근 10개 메일을 불러오고, 선택한 메일을 요약합니다.
@@ -101,6 +103,7 @@ def gmail():
         raise typer.Exit(1)
 
 @app.command()
+# Gmail 인증 토큰 파일을 삭제하여 계정 연결을 해제합니다.
 def gmail_logout():
     """
     Gmail 인증 토큰 파일(token.json, token.pickle 등)을 삭제하여 계정 연결을 해제합니다.
@@ -117,6 +120,23 @@ def gmail_logout():
                 typer.echo(f"❌ {fname} 파일 삭제 중 오류: {e}", err=True)
     if not deleted:
         typer.echo("ℹ️ 삭제할 인증 토큰 파일(token.json, token.pickle)이 없습니다.")
+
+@app.command()
+# 그래픽 사용자 인터페이스(GUI)를 실행합니다.
+def gui():
+    """
+    그래픽 사용자 인터페이스(GUI)를 실행합니다.
+    """
+    try:
+        from .gui import run_gui
+        run_gui()
+    except ImportError as e:
+        typer.echo(f"❌ GUI 모듈을 불러올 수 없습니다: {e}", err=True)
+        typer.echo("💡 tkinter가 설치되어 있는지 확인해주세요.", err=True)
+        raise typer.Exit(1)
+    except Exception as e:
+        typer.echo(f"❌ GUI 실행 중 오류 발생: {e}", err=True)
+        raise typer.Exit(1)
 
 if __name__ == "__main__":
     app() 
