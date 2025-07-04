@@ -1,7 +1,11 @@
 # AI 기반 이메일/메시지 요약 CLI 도구
 
+---
+
 ## 📋 소개
 긴 이메일, 메신저 대화, 문서 텍스트 등을 자연어 요약하여 핵심 정보를 빠르게 파악할 수 있도록 돕는 커맨드라인 도구(CLI)입니다.
+
+---
 
 ## 🚀 개발 진행 상황
 
@@ -39,12 +43,31 @@
 - [x] Gmail API 연동 기능 추가
 - [ ] 성능 최적화 및 안정성 개선
 
+---
+
 ## 🛠️ 설치 및 실행
 
-### 1. 프로젝트 클론
+### 🔑 먼저 확인하세요: credentials.json 생성 및 위치 안내
+
+- Gmail 등 Google API 연동을 위해서는 `credentials.json` 파일이 필요합니다.
+- [Google Cloud Console](https://console.cloud.google.com/)에서 OAuth 2.0 클라이언트 ID를 생성하고, 다운로드한 `credentials.json` 파일을 `src` 폴더에 위치시켜 주세요.
+- 예시 경로:
+  ```
+  src/
+  ├── credentials.json  # ← 여기에 위치
+  ├── email_summarizer/
+  ├── sample/
+  ├── tests/
+  ├── requirements.txt
+  ├── setup.py
+  └── README.md
+  ```
+- 이 파일은 개인정보를 포함하므로 `src/.gitignore`에 반드시 추가해야 하며, 외부에 공유하지 않도록 주의하세요.
+
+### 1. 프로젝트 클론 및 이동
 ```bash
 git clone <repository-url>
-cd email-summarizer-cli
+cd email-summarizer-cli/src
 ```
 
 ### 2. 의존성 설치
@@ -63,6 +86,8 @@ python -m email_summarizer summarize --file sample/sample.txt
 # GUI 실행
 python -m email_summarizer gui
 ```
+
+---
 
 ## 📖 CLI 사용법 및 옵션
 
@@ -91,20 +116,6 @@ echo "요약할 텍스트" | python -m email_summarizer summarize --highlight
 python -m email_summarizer gui
 ```
 
-### 🔑 credentials.json 생성 및 위치 안내
-
-- Gmail 등 Google API 연동을 위해서는 `credentials.json` 파일이 필요합니다.
-- [Google Cloud Console](https://console.cloud.google.com/)에서 OAuth 2.0 클라이언트 ID를 생성하고, 다운로드한 `credentials.json` 파일을 프로젝트 루트(최상위 폴더)에 위치시켜 주세요.
-- 예시 경로:
-  ```
-  email-summarizer-cli/
-  ├── credentials.json  # ← 여기에 위치
-  ├── email_summarizer/
-  ├── sample/
-  └── ...
-  ```
-- 이 파일은 개인정보를 포함하므로 `.gitignore`에 반드시 추가해야 하며, 외부에 공유하지 않도록 주의하세요.
-
 ### 지원 옵션
 | 옵션 | 축약 | 설명 | 기본값 |
 |------|------|------|--------|
@@ -112,6 +123,8 @@ python -m email_summarizer gui
 | `--highlight` | - | 키워드 강조 출력 (색상 및 굵기) | `True` |
 | `--no-highlight` | - | 키워드 강조 비활성화 | - |
 | `--length` | - | 요약 길이 조절 (short: 짧게, long: 길게, auto: 자동) | auto |
+
+---
 
 ## 🖥️ GUI 사용법
 
@@ -133,9 +146,11 @@ python -m email_summarizer gui
 - 중앙: 텍스트 입력
 - 하단: 결과 출력
 
+---
+
 ## 🏗️ 프로젝트 구조
 ```
-email-summarizer-cli/
+src/
 ├── email_summarizer/
 │   ├── __init__.py
 │   ├── __main__.py
@@ -157,6 +172,8 @@ email-summarizer-cli/
 └── README.md
 ```
 
+---
+
 ## 🔧 기술 스택 및 특징
 - **Python 3.7+**
 - **Typer**: CLI 프레임워크
@@ -173,23 +190,18 @@ email-summarizer-cli/
 - **seq2seq 기반(BART/KoBART) 요약 모델로 교체**
 - **멀티스레딩**: GUI에서 백그라운드 처리 지원
 
+---
+
 ## 🧪 테스트 및 샘플 파일
 
 ### 📊 샘플 데이터 출처 및 생성 방식
-본 프로젝트의 `sample/` 디렉토리에 포함된 모든 샘플 파일들은 **생성형 AI를 통해 생성된 테스트용 데이터**입니다.
+본 프로젝트의 `src/sample/` 디렉토리에 포함된 모든 샘플 파일들은 **생성형 AI를 통해 생성된 테스트용 데이터**입니다.
 
 #### 생성 목적
 - 이메일 요약 기능 테스트
 - 메신저 대화 요약 기능 테스트  
 - 다양한 언어(한국어, 영어, 혼합) 및 텍스트 유형별 요약 품질 검증
 - CLI 및 GUI 인터페이스 동작 확인
-
-#### 데이터 유형별 설명
-- `sample_email_*.txt`: 이메일 형태의 가상 대화/문서
-- `sample_article_*.txt`: 기술 문서 및 뉴스 기사 형태
-- `sample_mixed.txt`: 한국어와 영어가 혼합된 텍스트
-- `sample_english.txt`: 영어로 작성된 기술 문서
-- `sample.txt`: 기본 한국어 텍스트
 
 #### 주의사항
 - 모든 샘플 데이터는 실제 개인정보나 민감한 내용을 포함하지 않습니다
@@ -210,6 +222,8 @@ email-summarizer-cli/
   • 문장 수: 15개 → 3개
 ```
 
+---
+
 ## 🤝 기여하기
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -217,8 +231,12 @@ email-summarizer-cli/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+---
+
 ## 📝 라이선스
 이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+
+---
 
 ## 📞 문의
 프로젝트에 대한 질문이나 제안사항이 있으시면 이슈를 생성해 주세요.
