@@ -224,6 +224,13 @@ src/
 
 ---
 
+## 🤖 AI 활용 내역
+
+- BART/KoBART 생성형 요약 모델 적용  
+  입력된 이메일/문서/메시지 텍스트를 자연어로 요약하기 위해 Huggingface Transformers의 BART(영어) 및 KoBART(한국어) 생성형 요약 모델을 활용하였습니다.
+
+---
+
 ## 🤝 기여하기
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
