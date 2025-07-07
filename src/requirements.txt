@@ -1,8 +1,8 @@
 # requirements.txt 
-transformers
-torch
-sentencepiece
-numpy
+torch==2.0.1
+transformers==4.33.3
+sentence-transformers==2.2.2
+numpy==1.26.4
 beautifulsoup4
 google-auth>=2.0.0
 google-auth-oauthlib>=0.4.0
