@@ -1,3 +1,8 @@
+import os
+os.environ["TRANSFORMERS_VERBOSITY"] = "error"
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 # CLI 엔트리포인트 (Typer) 
 import sys
 import typer
@@ -60,6 +65,8 @@ def summarize(
         max_length, min_length = 250, 100
     else:
         max_length, min_length = None, None
+    # --- 로딩 메시지 추가 ---
+    typer.echo("⏳ 모델 및 요약 처리 중입니다... (최초 실행 시 수십 초 소요될 수 있습니다)")
     # 문맥 기반 요약 실행
     result = summarize_system_seq2seq(text, max_length=max_length, min_length=min_length, highlight=highlight)
     if result:
