@@ -1,0 +1,18 @@
+[11:05] Alex: Hey Sam, quick question about the sprint board.  
+Are we including the dashboard redesign in Sprint 12 or moving it to 13?
+
+[11:06] Sam: Good point. It’s currently in 12, but I’m thinking of pushing it to 13  
+since the backend API updates are not finalized yet.
+
+[11:08] Alex: That makes sense. I’ll update the board.  
+Also, do we have a final design for the new user flow?
+
+[11:09] Sam: Not yet. Jane is working on it — she said she’ll share the draft later today.
+
+[11:10] Alex: Cool. One more thing — should we create a separate ticket for mobile testing?
+
+[11:11] Sam: Yeah, please do. Let’s track Android and iOS separately this time.
+
+[11:12] Alex: Got it. I’ll split them and assign them to QA.
+
+[11:13] Sam: Perfect. Thanks, Alex!

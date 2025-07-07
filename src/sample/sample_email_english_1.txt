@@ -1,0 +1,29 @@
+Subject: [Meeting Invite] Q2 Project Kickoff – AI Chatbot Expansion
+
+From: emily.park@product.ai  
+To: ai-team@product.ai  
+Date: 2024-04-10 09:45
+
+Hi AI Team,
+
+We’re excited to begin our Q2 project focused on expanding the AI chatbot capabilities to support multilingual interactions and customer sentiment tracking.
+
+You are invited to the kickoff meeting scheduled as follows:
+
+- Date: April 12, 2024 (Friday)
+- Time: 2:00 PM – 3:30 PM
+- Location: 5th Floor – Innovation Lab
+
+Agenda:
+1. Overview of Q2 goals and deliverables
+2. Technical challenges in multilingual NLP
+3. Integration plan with existing chatbot infrastructure
+4. Resource planning and timeline
+
+Please come prepared with any initial ideas or concerns you'd like to discuss. The meeting link and materials will be shared by Thursday.
+
+Looking forward to seeing you all there!
+
+Best regards,  
+Emily Park  
+Product Manager
