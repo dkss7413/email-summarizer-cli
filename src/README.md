@@ -165,8 +165,6 @@ src/
 │   ├── sample_article.txt   # 기술 문서 샘플
 │   ├── sample_english.txt   # 영어 기술 문서 샘플
 │   └── sample_mixed.txt     # 한영 혼합 샘플
-├── tests/
-│   └── test_summarizer.py
 ├── requirements.txt
 ├── setup.py
 └── README.md
@@ -231,19 +229,5 @@ src/
 
 ---
 
-## 🤝 기여하기
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
 ## 📝 라이선스
 이 프로젝트는 MIT 라이선스 하에 배포됩니다.
-
----
-
-## 📞 문의
-프로젝트에 대한 질문이나 제안사항이 있으시면 이슈를 생성해 주세요.
