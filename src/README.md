@@ -47,23 +47,6 @@
 
 ## 🛠️ 설치 및 실행
 
-### 🔑 먼저 확인하세요: credentials.json 생성 및 위치 안내
-
-- Gmail 등 Google API 연동을 위해서는 `credentials.json` 파일이 필요합니다.
-- [Google Cloud Console](https://console.cloud.google.com/)에서 OAuth 2.0 클라이언트 ID를 생성하고, 다운로드한 `credentials.json` 파일을 `src` 폴더에 위치시켜 주세요.
-- 예시 경로:
-  ```
-  src/
-  ├── credentials.json  # ← 여기에 위치
-  ├── email_summarizer/
-  ├── sample/
-  ├── tests/
-  ├── requirements.txt
-  ├── setup.py
-  └── README.md
-  ```
-- 이 파일은 개인정보를 포함하므로 `src/.gitignore`에 반드시 추가해야 하며, 외부에 공유하지 않도록 주의하세요.
-
 ### 1. 프로젝트 클론 및 이동
 ```bash
 git clone <repository-url>
@@ -81,7 +64,7 @@ pip install -r requirements.txt
 python -m email_summarizer --help
 
 # 파일에서 요약
-python -m email_summarizer summarize --file sample/sample.txt
+python -m email_summarizer summarize --file sample/sample_message_korean_1.txt
 
 # GUI 실행
 python -m email_summarizer gui
@@ -94,20 +77,20 @@ python -m email_summarizer gui
 ### 기본 사용법
 ```bash
 # 파일에서 텍스트 요약 (언어 자동 감지)
-python -m email_summarizer summarize --file sample/sample.txt
+python -m email_summarizer summarize --file sample/sample_message_korean_1.txt
 
 # Gmail에서 최근 메일 요약
 python -m email_summarizer gmail
+- **Gmail 기능은 Gmail API에 테스트 사용자를 추가해야만 사용할 수 있기 때문에, 테스트가 어렵습니다.**
 
 # 키워드 강조 (색상 및 굵기)
-python -m email_summarizer summarize --file sample/sample.txt --highlight
+python -m email_summarizer summarize --file sample/sample_message_korean_1.txt --highlight
 
 # 키워드 강조 비활성화
-python -m email_summarizer summarize --file sample/sample.txt --no-highlight
+python -m email_summarizer summarize --file sample/sample_message_korean_1.txt --no-highlight
 
-# 영어/혼합 텍스트 요약 (자동 감지)
-python -m email_summarizer summarize --file sample/sample_english.txt --highlight
-python -m email_summarizer summarize --file sample/sample_mixed.txt --highlight
+# 영어 텍스트 요약 (자동 감지)
+python -m email_summarizer summarize --file sample/sample_message_english_1.txt --highlight
 
 # 표준 입력에서 텍스트 요약 (파이프 지원)
 echo "요약할 텍스트" | python -m email_summarizer summarize --highlight
@@ -136,6 +119,7 @@ python -m email_summarizer gui
 ### 주요 기능
 1. 📁 파일 업로드
 2. 📧 Gmail 연동 (최근 10개 이메일 불러오기/요약)
+- **Gmail 기능은 Gmail API에 테스트 사용자를 추가해야만 사용할 수 있기 때문에, 테스트가 어렵습니다.**
 3. ✏️ 직접 입력
 4. ⚙️ 요약 길이 조절(짧게/길게/자동), 키워드 강조 등 설정
 5. 📊 실시간 진행(프로그레스바)
