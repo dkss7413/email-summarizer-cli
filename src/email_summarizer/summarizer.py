@@ -157,7 +157,8 @@ def summarize_system_seq2seq(text: str, max_length: int = None, min_length: int 
         summary = summarize_with_seq2seq(text, language, max_length=max_length, min_length=min_length)
         summary_sentences = split_sentences(summary)
         if len(summary_sentences) <= 1 and min_length < 120:
-            summary = summarize_with_seq2seq(text, language, max_length=max_length, min_length=120)
+            safe_min_length = min(120, max_length)
+            summary = summarize_with_seq2seq(text, language, max_length=max_length, min_length=safe_min_length)
             summary_sentences = split_sentences(summary)
         sentiment_label_full, sentiment_score_full = analyze_sentiment(text)
         sentiment_label_sum, sentiment_score_sum = analyze_sentiment(summary)
@@ -220,56 +221,19 @@ def detect_text_type(text: str) -> str:
 def get_summary_strategy(text_type: str) -> Dict:
     strategy = {
         'email': {
-            'top_n': 4,
+            'top_n': 6,
             'diversity': 0.6,
             'redundancy_threshold': 0.8,
             'preprocess': True
         },
         'general': {
-            'top_n': 5,
+            'top_n': 6,
             'diversity': 0.7,
             'redundancy_threshold': 0.85,
             'preprocess': False
         }
     }
     return strategy.get(text_type, strategy['general'])
-
-# MMR 요약
-def mmr(doc_embedding, sentence_embeddings, sentences, top_n=5, diversity=0.7, redundancy_threshold=0.85):
-    selected = []
-    selected_idx = []
-    candidate_idx = list(range(len(sentences)))
-
-    while len(selected) < top_n and candidate_idx:
-        if not selected:
-            sim_to_doc = cosine_similarity(sentence_embeddings, [doc_embedding]).reshape(-1)
-            first_idx = int(np.argmax(sim_to_doc))
-            selected.append(sentences[first_idx])
-            selected_idx.append(first_idx)
-            candidate_idx.remove(first_idx)
-        else:
-            mmr_scores = []
-            for idx in candidate_idx:
-                sim_to_doc = cosine_similarity([sentence_embeddings[idx]], [doc_embedding])[0][0]
-                sim_to_selected = max(
-                    cosine_similarity([sentence_embeddings[idx]], [sentence_embeddings[s]])[0][0]
-                    for s in selected_idx
-                )
-                if sim_to_selected > redundancy_threshold:
-                    continue
-                score = diversity * sim_to_doc - (1 - diversity) * sim_to_selected
-                mmr_scores.append((score, idx))
-
-            if not mmr_scores:
-                break
-            mmr_scores.sort(reverse=True)
-            best_idx = mmr_scores[0][1]
-            selected.append(sentences[best_idx])
-            selected_idx.append(best_idx)
-            candidate_idx.remove(best_idx)
-
-    ordered = sorted(zip(selected_idx, selected), key=lambda x: x[0])
-    return [s for _, s in ordered]
 
 # 키워드 강조
 def highlight_keywords(text, keywords):
@@ -279,97 +243,4 @@ def highlight_keywords(text, keywords):
             continue
         pattern = re.compile(rf'(?<![\w가-힣]){re.escape(keyword)}(?![\w가-힣])', re.IGNORECASE)
         highlighted_text = pattern.sub(f"\033[1;36m{keyword}\033[0m", highlighted_text)
-    return highlighted_text
-
-# 요약 파이프라인
-def summarize_system(text: str, highlight: bool = True):
-    if not text or len(text) < 30:
-        return "⚠️ 입력이 너무 짧습니다. 최소한 2~3문장 이상의 텍스트를 입력해 주세요."
-
-    try:
-        text_type = detect_text_type(text)
-        strategy = get_summary_strategy(text_type)
-
-        sentences = split_sentences(text)
-        if len(sentences) < 3:
-            raise ValueError("문장이 너무 적습니다.")
-
-        language = detect_language(text)
-        sentence_embeddings = embedding_model.encode(sentences)
-        doc_embedding = np.mean(sentence_embeddings, axis=0)
-
-        summary_sentences = mmr(
-            doc_embedding=doc_embedding,
-            sentence_embeddings=sentence_embeddings,
-            sentences=sentences,
-            top_n=strategy['top_n'],
-            diversity=strategy['diversity'],
-            redundancy_threshold=strategy['redundancy_threshold']
-        )
-        summary = ' '.join(summary_sentences)
-
-        keywords = extract_keywords(sentences, top_n=10)
-        sentiment_label, sentiment_score = analyze_sentiment(summary)
-        summary_highlighted = highlight_keywords(summary, keywords) if highlight else summary
-
-        return {
-            "summary": summary_highlighted,
-            "keywords": keywords,
-            "sentiment": (sentiment_label, sentiment_score),
-            "original_length": len(text),
-            "summary_length": len(summary),
-            "sentence_count": len(sentences),
-            "selected_sentences": len(summary_sentences),
-            "detected_language": language,
-            "text_type": text_type
-        }
-
-    except Exception as e:
-        print("🚫 오류 발생:", e)
-        return None
-
-# 출력 포맷
-def format_summary_output(summary_result: Dict) -> str:
-    output = []
-    output.append("📝 요약 결과:")
-    output.append("")
-
-    summary_text = summary_result["summary"]
-    lines = []
-
-    if summary_result.get("text_type") == "email":
-        header_patterns = [
-            r'(보내는 사람\s*:\s*[^\s]+@[^\s]+)',
-            r'(받는 사람\s*:\s*[^\s]+@[^\s]+)',
-            r'(참조\s*:\s*[^\s]+@[^\s]+)',
-            r'(제목\s*:\s*.+)'
-        ]
-        greeting_pattern = r'(안녕하세요[.!?\s]*)'
-        rest = summary_text
-        for pat in header_patterns:
-            m = re.search(pat, rest)
-            if m:
-                lines.append(m.group(1).strip())
-                rest = rest.replace(m.group(1), '').strip()
-        m = re.search(greeting_pattern, rest)
-        if m:
-            lines.append(m.group(1).strip())
-            rest = rest.replace(m.group(1), '').strip()
-        sentences = re.split(r'(?<=[.!?。！？])\s+', rest)
-        lines += [s.strip() for s in sentences if s.strip()]
-    else:
-        lines = re.split(r'(?<=[.!?。！？])\s+', summary_text)
-
-    output.append('\n'.join(lines))
-    output.append("")
-    output.append(f"📄 문서 유형: {summary_result['text_type'].capitalize()}")
-    output.append(f"🌐 언어 감지: {summary_result['detected_language']}")
-    label, score = summary_result["sentiment"]
-    korean_sentiment, confidence_level = convert_sentiment_to_korean(label, score)
-    output.append(f"😊 감정 분석: {korean_sentiment} (신뢰도: {confidence_level})")
-    output.append("")
-    output.append("📊 통계:")
-    output.append(f"  • 원본 길이: {summary_result['original_length']:,}자")
-    output.append(f"  • 요약 길이: {summary_result['summary_length']:,}자")
-    output.append(f"  • 문장 수: {summary_result['sentence_count']}개 → {summary_result['selected_sentences']}개")
-    return '\n'.join(output) 
+    return highlighted_text 
